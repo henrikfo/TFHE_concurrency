@@ -80,11 +80,11 @@ fn main() -> Result<(), CryptoAPIError> {
 
     let c = LWE::encode_encrypt(&sk0, 0., &enc).unwrap();
 
-    let c_vec: Vec<LWE> = vec![c.clone(); 144];
+    let c_vec: Vec<LWE> = vec![c.clone(); 80];
     
     println!("Starting Parallel!");
     let time_start = Instant::now();
-    let res_vec = concurrent_bootstrap(4, add_1, c_vec.clone(), &bsk, &enc);
+    let res_vec = concurrent_bootstrap(8, add_1, c_vec.clone(), &bsk, &enc);
     println!("{:.3}", (time_start.elapsed().as_micros() as f32)/ 1_000_000.);
 
     println!("Starting Sequential!");
