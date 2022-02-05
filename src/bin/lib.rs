@@ -4,7 +4,7 @@ use concrete_commons::numeric::Numeric;
 //use concrete_core::math::tensor::Tensor;
 use std::thread;
 use std::sync::mpsc;
-use std::time::Instant;
+use threadpool::ThreadPool;
 //use rayon::prelude::*;
 
 
@@ -20,13 +20,24 @@ pub fn lwe_pp(lwe_vec: &Vec<LWE>) ->(){
 //fn slicing
 
 pub struct Tfheconcurrency{
-    sk0: LWESecretKey,
-    sk1: LWESecretKey,
+    pub sk0: LWESecretKey,
+    pub sk1: LWESecretKey,
     bsk: LWEBSK,
     enc: Encoder,
     //f: Fn(f64)->f64,
     max_threads: usize
 }
+
+pub struct TfheconcurrencyPool{
+    pub sk0: LWESecretKey,
+    pub sk1: LWESecretKey,
+    bsk: LWEBSK,
+    enc: Encoder,
+    //f: Fn(f64)->f64,
+    max_threads: usize,
+    pool: ThreadPool
+}
+
 
 impl Tfheconcurrency{
     pub fn new(lwe_par: &LWEParams, rlwe_par: &RLWEParams, threads: usize, _save: bool) -> Tfheconcurrency{
@@ -106,6 +117,64 @@ impl Tfheconcurrency{
         }
         for t in threads{
             t.join().unwrap();
+        }
+        while let Ok(results) = rx.try_recv(){
+            res_vec.push(results);
+        }
+        return res_vec.into_iter().flatten().collect::<Vec<LWE>>();
+    }
+}
+
+impl TfheconcurrencyPool{
+    pub fn new(lwe_par: &LWEParams, rlwe_par: &RLWEParams, threads: usize, _save: bool) -> TfheconcurrencyPool{
+
+        println!("Making Keys!");
+        let sk = LWESecretKey::new(lwe_par);
+        let sk_rlwe = RLWESecretKey::new(rlwe_par);
+
+        /*Tfheconcurrency{
+        sk0: LWESecretKey::new(&LWE80_650),
+        sk1: sk_rlwe.to_lwe_secret_key(),
+        bsk: LWEBSK::new(&self.sk0, &sk_rlwe, 5, 4),
+        enc: Encoder::new(0., 2., 4, 1).unwrap()
+        };*/
+        
+        /*if save{
+            self.sk0.save();
+            self.sk1.save();
+            self.bsk.save();
+            self.enc.save();
+        }*/
+        return TfheconcurrencyPool{
+            bsk: LWEBSK::new(&sk, &sk_rlwe, 5, 4),
+            sk0: sk,
+            sk1: sk_rlwe.to_lwe_secret_key(),
+            enc: Encoder::new(0., 2., 4, 1).unwrap(),
+            pool: ThreadPool::new(threads),
+            max_threads: threads
+            };
+        }
+
+    pub fn para_boot_pool(&self, lwe_vec: Vec<LWE>, func: fn(f64) -> f64) -> Vec<LWE>{
+        let (tx, rx) = mpsc::channel();
+        //let mut threads = vec![];
+        let mut res_vec = vec![];
+
+        for i in 0..self.max_threads{
+            let tx_clone = tx.clone();
+            let enc_clone = self.enc.clone();
+            let bsk_clone = self.bsk.clone();
+
+            let size = lwe_vec.len()/self.max_threads;
+            let mut work: Vec<LWE> = lwe_vec[i*size..(i+1)*size].to_vec();
+
+            self.pool.execute(move || { 
+                /*for lwe_text in work.iter_mut(){
+                    *lwe_text = lwe_text.bootstrap_with_function(&bsk_clone, |x| func(x), &enc_clone).unwrap();
+                }*/
+                println!("Hello");
+                //tx_clone.send(work).unwrap();
+            });
         }
         while let Ok(results) = rx.try_recv(){
             res_vec.push(results);
