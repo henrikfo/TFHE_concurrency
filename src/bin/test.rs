@@ -24,8 +24,8 @@ fn main() -> Result<(), CryptoAPIError> {
     // Get a Vector of Ciphertexts with value Val and length Len
 
     let mut lengths = vec![];
-    for i in 1..32{
-        lenghts.push(i*10);
+    for i in 1..100{
+        lengths.push(i*2);
     }
 
     for nbr in lengths.iter(){
@@ -35,7 +35,7 @@ fn main() -> Result<(), CryptoAPIError> {
         // Input: (Vector: Vec<LWE>, f: fn) 
         // Evaluate the function f on the Vector "Vector"
         let mut times = vec![];
-        let threads = vec![1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
+        let threads = vec![1,2,3,4,5,6,7,8];
 
         for thread in threads.iter(){ 
             
@@ -43,7 +43,7 @@ fn main() -> Result<(), CryptoAPIError> {
 
             let start = Instant::now();
             
-            for _ in 0..10{
+            for _ in 0..2{
                 let _ = tfhe.para_boot(c_vec.clone(), plus_1);
             }
             times.push((start.elapsed().as_micros() as f32)/ 1_000_000.);
@@ -62,7 +62,7 @@ fn main() -> Result<(), CryptoAPIError> {
             };
             Some(min)
         });
-        println!("{}, {:?}", nbr, res.unwrap());
+        println!("{}, {:?}", nbr, res.unwrap().0);
     }
     Ok(())
 }
