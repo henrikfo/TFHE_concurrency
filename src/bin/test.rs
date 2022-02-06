@@ -23,10 +23,10 @@ fn main() -> Result<(), CryptoAPIError> {
     // Input: (Val: f64, Len: usize)
     // Get a Vector of Ciphertexts with value Val and length Len
 
-    let mut lengths = vec![];
-    for i in 1..80{
-        lengths.push(i*2);
-    }
+    let mut lengths = vec![24];
+    //for i in 1..80{
+    //    lengths.push(i*2);
+    //}
 
     for nbr in lengths.iter(){
         let c_vec = tfhe.get_ctxt_vec(0., nbr.clone());
@@ -51,7 +51,7 @@ fn main() -> Result<(), CryptoAPIError> {
             //println!("{}, {}", res_vec.len(), res_vec[0].decrypt_decode(&tfhe.sk1).unwrap());
         }
 
-        let mut iter = times.iter().enumerate();
+        /*let mut iter = times.iter().enumerate();
         let init = iter.next().ok_or("Need at least one input").unwrap();
         let res = iter.try_fold(init, |acc, x| {
             let cmp = x.1.partial_cmp(acc.1).unwrap();
@@ -63,6 +63,7 @@ fn main() -> Result<(), CryptoAPIError> {
             Some(min)
         });
         println!("{}, {:?}", nbr, res.unwrap().0+1);
+        */
     }
     Ok(())
 }
