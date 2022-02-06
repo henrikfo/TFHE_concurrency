@@ -24,8 +24,8 @@ fn main() -> Result<(), CryptoAPIError> {
     // Get a Vector of Ciphertexts with value Val and length Len
 
     let mut lengths = vec![];
-    for i in 1..100{
-        lengths.push(i*2);
+    for i in 1..80{
+        lengths.push(i*1);
     }
 
     for nbr in lengths.iter(){
