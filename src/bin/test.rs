@@ -23,7 +23,7 @@ fn main() -> Result<(), CryptoAPIError> {
     // Input: (Val: f64, Len: usize)
     // Get a Vector of Ciphertexts with value Val and length Len
 
-    let mut lenghts = vec![];
+    let mut lengths = vec![];
     for i in 1..32{
         lenghts.push(i*10);
     }
