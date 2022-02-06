@@ -25,17 +25,17 @@ fn main() -> Result<(), CryptoAPIError> {
 
     let mut lengths = vec![];
     for i in 1..80{
-        lengths.push(i*1);
+        lengths.push(i*2);
     }
 
     for nbr in lengths.iter(){
-
         let c_vec = tfhe.get_ctxt_vec(0., nbr.clone());
 
         // Input: (Vector: Vec<LWE>, f: fn) 
         // Evaluate the function f on the Vector "Vector"
         let mut times = vec![];
         let threads = vec![1,2,3,4,5,6,7,8];
+        //let threads = vec![7];
 
         for thread in threads.iter(){ 
             
@@ -62,7 +62,7 @@ fn main() -> Result<(), CryptoAPIError> {
             };
             Some(min)
         });
-        println!("{}, {:?}", nbr, res.unwrap().0);
+        println!("{}, {:?}", nbr, res.unwrap().0+1);
     }
     Ok(())
 }

@@ -26,7 +26,7 @@ pub struct Tfheconcurrency{
     pub max_threads: usize
 }
 
-impl Tfheconcurrency{
+impl Tfheconcurrency {
     pub fn new(lwe_par: &LWEParams, rlwe_par: &RLWEParams, threads: usize, _save: bool) -> Tfheconcurrency{
 
         println!("Making Keys!");
@@ -79,7 +79,23 @@ impl Tfheconcurrency{
         return lwe_vec
     }
 
-    //pub fn slicing(length: usize, threads: usize)
+    pub fn slicing(&self, length: usize, threads: &usize) -> Vec<usize>{
+        let mut index = vec![0; threads.clone()];
+        let mut indexes = vec![0];
+        for i in 0..length{
+            index[i % (threads)] += 1;
+        }
+        for i in 0..threads.clone(){
+            let mut tmp = 0;
+            for j in 0..i+1{
+                tmp += index[j]
+            }
+            indexes.push(tmp);
+        }
+        //println!("{:?}", indexes);
+        //println!("{:?}", index);
+        return indexes
+    }
     
     //DOES NOT GUARANTEE ORDER IN RESULTING VECTOR
     //fn para_boot<F: (Fn(f64) -> f64) + Send + 'static + Copy>(&self, c: Vec<LWE>, func: F) -> Vec<LWE>{
@@ -88,14 +104,15 @@ impl Tfheconcurrency{
         let mut threads = vec![];
         let mut res_vec = vec![];
         
+        let idx = self.slicing(lwe_vec.len().clone(), &self.max_threads);
 
         for i in 0..self.max_threads{
             let tx_clone = tx.clone();
             let enc_clone = self.enc.clone();
             let bsk_clone = self.bsk.clone();
 
-            let size = lwe_vec.len()/self.max_threads;
-            let mut work: Vec<LWE> = lwe_vec[i*size..(i+1)*size].to_vec();
+            //let size = lwe_vec.len()/self.max_threads;
+            let mut work: Vec<LWE> = lwe_vec[idx[i]..idx[i+1]].to_vec();
 
             let t = thread::spawn( move || { 
                 for lwe_text in work.iter_mut(){
