@@ -64,6 +64,7 @@ fn main() -> Result<(), CryptoAPIError> {
         });
         println!("{}, {:?}", nbr, res.unwrap().0+1);
         */
+        println!("{:?}", times);
     }
     Ok(())
 }
