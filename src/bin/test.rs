@@ -18,53 +18,37 @@ fn main() -> Result<(), CryptoAPIError> {
 
     // Input: (LWE Params: LWEParams, RLWE Params: RLWEParams, Max Threads: usize, Save: bool)
     // Initialize a TFHE instance
-    let mut tfhe = Tfheconcurrency::new(&LWE80_256, &RLWE80_1024_1, 2, false);
+    
+    let rlwe_params = RLWEParams {
+        dimension: 1,
+        polynomial_size: 4096,
+        log2_std_dev: -62,
+    };
+
+    let mut tfhe = Tfheconcurrency::new(&LWE80_750, &rlwe_params, 2, false);
+    //let mut tfhe = Tfheconcurrency::new(&LWE80_750, &RLWE80_2048_1, 2, false);
 
     // Input: (Val: f64, Len: usize)
     // Get a Vector of Ciphertexts with value Val and length Len
-
-    let mut lengths = vec![24];
-    //for i in 1..80{
-    //    lengths.push(i*2);
+    //let lenght = vec![128, 256, 512, 1024];
+    //let mut lenght = vec![];
+    //for i in 2..32{
+    //    lenght.push(i*128);
     //}
+    //for len in lenght.iter(){
+    let c_vec = tfhe.get_ctxt_vec(0., 4096);
 
-    for nbr in lengths.iter(){
-        let c_vec = tfhe.get_ctxt_vec(0., nbr.clone());
+    // Input: (Vector: Vec<LWE>, f: fn) 
+    // Evaluate the function f on the Vector "Vector"
+    let threads = vec![1, 8];
+    let mut times = vec![];
 
-        // Input: (Vector: Vec<LWE>, f: fn) 
-        // Evaluate the function f on the Vector "Vector"
-        let mut times = vec![];
-        let threads = vec![1,2,3,4,5,6,7,8];
-        //let threads = vec![7];
-
-        for thread in threads.iter(){ 
-            
-            tfhe.max_threads = *thread;
-
-            let start = Instant::now();
-            
-            for _ in 0..2{
-                let _ = tfhe.para_boot(c_vec.clone(), plus_1);
-            }
-            times.push((start.elapsed().as_micros() as f32)/ 1_000_000.);
-            //println!("{:.3}", (start.elapsed().as_micros() as f32)/ 1_000_000.);
-            //println!("{}, {}", res_vec.len(), res_vec[0].decrypt_decode(&tfhe.sk1).unwrap());
-        }
-
-        /*let mut iter = times.iter().enumerate();
-        let init = iter.next().ok_or("Need at least one input").unwrap();
-        let res = iter.try_fold(init, |acc, x| {
-            let cmp = x.1.partial_cmp(acc.1).unwrap();
-            let min = if let std::cmp::Ordering::Less = cmp {
-                x
-            } else {
-                acc
-            };
-            Some(min)
-        });
-        println!("{}, {:?}", nbr, res.unwrap().0+1);
-        */
-        println!("{:?}", times);
+    for thread in threads.iter(){ 
+        tfhe.max_threads = *thread;
+        let start = Instant::now();
+        let _ = tfhe.para_boot(c_vec.clone(), plus_1);
+        times.push((start.elapsed().as_millis() as f64) / 1000.);
     }
+    println!("{}, {}, {}", 4096, times[0], times[1]);
     Ok(())
 }
