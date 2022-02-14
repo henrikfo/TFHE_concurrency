@@ -18,12 +18,12 @@ fn main() -> Result<(), CryptoAPIError> {
 
     // Input: (LWE Params: LWEParams, RLWE Params: RLWEParams, Max Threads: usize, Save: bool)
     // Initialize a TFHE instance
-    let mut tfhe = Tfheconcurrency::new(&LWE80_256, &RLWE80_1024_1, 2, false);
+    let mut tfhe = Tfheconcurrency::new(&LWE80_1024, &RLWE80_1024_1, 2, false);
 
     // Input: (Val: f64, Len: usize)
     // Get a Vector of Ciphertexts with value Val and length Len
 
-    let mut lengths = vec![24];
+    let mut lengths = vec![8];
     //for i in 1..80{
     //    lengths.push(i*2);
     //}
@@ -42,10 +42,9 @@ fn main() -> Result<(), CryptoAPIError> {
             tfhe.max_threads = *thread;
 
             let start = Instant::now();
-            
-            for _ in 0..2{
-                let _ = tfhe.para_boot(c_vec.clone(), plus_1);
-            }
+
+            let _ = tfhe.para_boot(c_vec.clone(), plus_1);
+
             times.push((start.elapsed().as_micros() as f32)/ 1_000_000.);
             //println!("{:.3}", (start.elapsed().as_micros() as f32)/ 1_000_000.);
             //println!("{}, {}", res_vec.len(), res_vec[0].decrypt_decode(&tfhe.sk1).unwrap());

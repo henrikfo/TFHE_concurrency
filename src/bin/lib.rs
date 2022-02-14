@@ -104,6 +104,7 @@ impl Tfheconcurrency {
         let mut threads = vec![];
         let mut res_vec = vec![];
         
+        
         let idx = self.slicing(lwe_vec.len().clone(), &self.max_threads);
 
         for i in 0..self.max_threads{
