@@ -47,7 +47,7 @@ impl Tfheconcurrency {
             self.enc.save();
         }*/
         return Tfheconcurrency{
-            bsk: LWEBSK::new(&sk, &sk_rlwe, 4, 4),
+            bsk: LWEBSK::new(&sk, &sk_rlwe, 5, 5),
             sk0: sk,
             sk1: sk_rlwe.to_lwe_secret_key(),
             enc: Encoder::new(0., 2., 4, 1).unwrap(),
@@ -103,7 +103,6 @@ impl Tfheconcurrency {
         let (tx, rx) = mpsc::channel();
         let mut threads = vec![];
         let mut res_vec = vec![];
-        
         
         let idx = self.slicing(lwe_vec.len().clone(), &self.max_threads);
 
