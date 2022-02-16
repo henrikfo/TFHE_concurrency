@@ -43,20 +43,20 @@ impl Tfheconcurrency {
         }*/
         return Tfheconcurrency{
             bsk: LWEBSK::new(&sk, &sk_rlwe, 6, 6),
-            ksk: LWEKSK::new(&sk_out, &sk, 6, 6)
+            ksk: LWEKSK::new(&sk_out, &sk, 6, 6),
             sk0: sk,
-            sk1: sk_out
+            sk1: sk_out,
             enc: enc,
             max_threads: threads
             };
     }
 
-    pub fn new(sk: LWESecretKey, sk_out: LWE, bsk: LWEBSK, ksk: LWEKSK, enc: Encoder, threads: usize, _save: bool) -> Tfheconcurrency{
+    pub fn new(sk: LWESecretKey, sk_out: LWESecretKey, bsk: LWEBSK, ksk: LWEKSK, enc: Encoder, threads: usize, _save: bool) -> Tfheconcurrency{
         return Tfheconcurrency{
             bsk: bsk,
-            ksk: ksk
+            ksk: ksk,
             sk0: sk,
-            sk1: sk_out
+            sk1: sk_out,
             enc: enc,
             max_threads: threads
             };
