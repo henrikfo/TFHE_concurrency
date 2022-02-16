@@ -21,25 +21,20 @@ pub struct Tfheconcurrency{
     pub sk0: LWESecretKey,
     pub sk1: LWESecretKey,
     bsk: LWEBSK,
+    ksk:LWEKSK,
     enc: Encoder,
     //f: Fn(f64)->f64,
     pub max_threads: usize
 }
 
 impl Tfheconcurrency {
-    pub fn new(lwe_par: &LWEParams, rlwe_par: &RLWEParams, threads: usize, _save: bool) -> Tfheconcurrency{
+    pub fn init_new(lwe_par: &LWEParams, rlwe_par: &RLWEParams, enc: Encoder, threads: usize, _save: bool) -> Tfheconcurrency{
 
         println!("Making Keys!");
         let sk = LWESecretKey::new(lwe_par);
         let sk_rlwe = RLWESecretKey::new(rlwe_par);
+        let sk_out = sk_rlwe.to_lwe_secret_key();
 
-        /*Tfheconcurrency{
-        sk0: LWESecretKey::new(&LWE80_650),
-        sk1: sk_rlwe.to_lwe_secret_key(),
-        bsk: LWEBSK::new(&self.sk0, &sk_rlwe, 5, 4),
-        enc: Encoder::new(0., 2., 4, 1).unwrap()
-        };*/
-        
         /*if save{
             self.sk0.save();
             self.sk1.save();
@@ -47,10 +42,22 @@ impl Tfheconcurrency {
             self.enc.save();
         }*/
         return Tfheconcurrency{
-            bsk: LWEBSK::new(&sk, &sk_rlwe, 5, 5),
+            bsk: LWEBSK::new(&sk, &sk_rlwe, 6, 6),
+            ksk: LWEKSK::new(&sk_out, &sk, 6, 6)
             sk0: sk,
-            sk1: sk_rlwe.to_lwe_secret_key(),
-            enc: Encoder::new(0., 2., 4, 1).unwrap(),
+            sk1: sk_out
+            enc: enc,
+            max_threads: threads
+            };
+    }
+
+    pub fn new(sk: LWESecretKey, sk_out: LWE, bsk: LWEBSK, ksk: LWEKSK, enc: Encoder, threads: usize, _save: bool) -> Tfheconcurrency{
+        return Tfheconcurrency{
+            bsk: bsk,
+            ksk: ksk
+            sk0: sk,
+            sk1: sk_out
+            enc: enc,
             max_threads: threads
             };
     }

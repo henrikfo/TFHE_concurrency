@@ -18,7 +18,7 @@ fn main() -> Result<(), CryptoAPIError> {
 
     // Input: (LWE Params: LWEParams, RLWE Params: RLWEParams, Max Threads: usize, Save: bool)
     // Initialize a TFHE instance
-    let mut tfhe = Tfheconcurrency::new(&LWE80_1024, &RLWE80_1024_1, 2, false);
+    let mut tfhe = Tfheconcurrency::init_new(&LWE80_1024, &RLWE80_1024_1, Encoder::new(0., 2., 4, 1).unwrap(), 2, false);
 
     // Input: (Val: f64, Len: usize)
     // Get a Vector of Ciphertexts with value Val and length Len
