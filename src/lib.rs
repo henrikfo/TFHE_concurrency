@@ -21,7 +21,7 @@ pub struct Tfheconcurrency{
     pub sk0: LWESecretKey,
     pub sk1: LWESecretKey,
     bsk: LWEBSK,
-    ksk:LWEKSK,
+    ksk:    LWEKSK,
     enc: Encoder,
     //f: Fn(f64)->f64,
     pub max_threads: usize
@@ -35,12 +35,6 @@ impl Tfheconcurrency {
         let sk_rlwe = RLWESecretKey::new(rlwe_par);
         let sk_out = sk_rlwe.to_lwe_secret_key();
 
-        /*if save{
-            self.sk0.save();
-            self.sk1.save();
-            self.bsk.save();
-            self.enc.save();
-        }*/
         return Tfheconcurrency{
             bsk: LWEBSK::new(&sk, &sk_rlwe, 6, 6),
             ksk: LWEKSK::new(&sk_out, &sk, 6, 6),
@@ -115,15 +109,15 @@ impl Tfheconcurrency {
 
         for i in 0..self.max_threads{
             let tx_clone = tx.clone();
-            let enc_clone = self.enc.clone();
-            let bsk_clone = self.bsk.clone();
+            //let enc_clone = self.enc.clone();
+            //let bsk_clone = self.bsk.clone();
 
             //let size = lwe_vec.len()/self.max_threads;
             let mut work: Vec<LWE> = lwe_vec[idx[i]..idx[i+1]].to_vec();
 
             let t = thread::spawn( move || { 
                 for lwe_text in work.iter_mut(){
-                    *lwe_text = lwe_text.bootstrap_with_function(&bsk_clone, |x| func(x), &enc_clone).unwrap();
+                    *lwe_text = lwe_text.bootstrap_with_function(&self.bsk, |x| func(x), &self.enc).unwrap();
                 }
                 tx_clone.send(work).unwrap();
             });
@@ -136,7 +130,5 @@ impl Tfheconcurrency {
             res_vec.push(results);
         }
         return res_vec.into_iter().flatten().collect::<Vec<LWE>>();
-        
-
     }
 }
