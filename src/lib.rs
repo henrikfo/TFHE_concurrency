@@ -36,10 +36,10 @@ impl Tfheconcurrency {
         let sk_out = sk_rlwe.to_lwe_secret_key();
 
         return Tfheconcurrency{
-            sk0: sk,
-            sk1: sk_out,
             bsk: LWEBSK::new(&sk, &sk_rlwe, 6, 6),
             ksk: LWEKSK::new(&sk_out, &sk, 6, 6),
+            sk0: sk,
+            sk1: sk_out,
             enc: enc,
             max_threads: threads
             };
@@ -100,35 +100,35 @@ impl Tfheconcurrency {
     
     //DOES NOT GUARANTEE ORDER IN RESULTING VECTOR
     //fn para_boot<F: (Fn(f64) -> f64) + Send + 'static + Copy>(&self, c: Vec<LWE>, func: F) -> Vec<LWE>{
-        pub fn para_boot(&self, lwe_vec: Vec<LWE>, func: fn(f64) -> f64) -> Vec<LWE>{
-            let (tx, rx) = mpsc::channel();
-            let mut threads = vec![];
-            let mut res_vec = vec![];
-            
-            let idx = self.slicing(lwe_vec.len().clone(), &self.max_threads);
-    
-            for i in 0..self.max_threads{
-                let tx_clone = tx.clone();
-                let enc_clone = self.enc.clone();
-                let bsk_clone = self.bsk.clone();
-    
-                //let size = lwe_vec.len()/self.max_threads;
-                let mut work: Vec<LWE> = lwe_vec[idx[i]..idx[i+1]].to_vec();
-    
-                let t = thread::spawn( move || { 
-                    for lwe_text in work.iter_mut(){
-                        *lwe_text = lwe_text.bootstrap_with_function(&bsk_clone, |x| func(x), &enc_clone).unwrap();
-                    }
-                    tx_clone.send(work).unwrap();
-                });
-                threads.push(t);
-            }
-            for t in threads{
-                t.join().unwrap();
-            }
-            while let Ok(results) = rx.try_recv(){
-                res_vec.push(results);
-            }
-            return res_vec.into_iter().flatten().collect::<Vec<LWE>>();
+    pub fn para_boot(&self, lwe_vec: Vec<LWE>, func: fn(f64) -> f64) -> Vec<LWE>{
+        let (tx, rx) = mpsc::channel();
+        let mut threads = vec![];
+        let mut res_vec = vec![];
+        
+        let idx = self.slicing(lwe_vec.len().clone(), &self.max_threads);
+
+        for i in 0..self.max_threads{
+            let tx_clone = tx.clone();
+            let enc_clone = self.enc.clone();
+            let bsk_clone = self.bsk.clone();
+
+            //let size = lwe_vec.len()/self.max_threads;
+            let mut work: Vec<LWE> = lwe_vec[idx[i]..idx[i+1]].to_vec();
+
+            let t = thread::spawn( move || { 
+                for lwe_text in work.iter_mut(){
+                    *lwe_text = lwe_text.bootstrap_with_function(&bsk_clone, |x| func(x), &enc_clone).unwrap();
+                }
+                tx_clone.send(work).unwrap();
+            });
+            threads.push(t);
+        }
+        for t in threads{
+            t.join().unwrap();
+        }
+        while let Ok(results) = rx.try_recv(){
+            res_vec.push(results);
+        }
+        return res_vec.into_iter().flatten().collect::<Vec<LWE>>();
     }
 }
