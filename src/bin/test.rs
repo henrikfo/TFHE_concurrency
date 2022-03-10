@@ -23,48 +23,11 @@ fn main() -> Result<(), CryptoAPIError> {
 
     // Input: (Val: f64, Len: usize)
     // Get a Vector of Ciphertexts with value Val and length Len
+    let c_vec = tfhe.get_ctxt_vec(0., 8);
 
-    let mut lengths = vec![8];
-    //for i in 1..80{
-    //    lengths.push(i*2);
-    //}
+    // Input: (Vector: Vec<LWE>, f: fn) 
+    // Evaluate the function f on the Vector "Vector
+    let _ = tfhe.para_boot(c_vec.clone(), plus_1);
 
-    for nbr in lengths.iter(){
-        let c_vec = tfhe.get_ctxt_vec(0., nbr.clone());
-
-        // Input: (Vector: Vec<LWE>, f: fn) 
-        // Evaluate the function f on the Vector "Vector"
-        let mut times = vec![];
-        let threads = vec![1,2,3,4,5,6,7,8];
-        //let threads = vec![7];
-
-        for thread in threads.iter(){ 
-            
-            tfhe.max_threads = *thread;
-
-            let start = Instant::now();
-
-            let _ = tfhe.para_boot(c_vec.clone(), plus_1);
-
-            times.push((start.elapsed().as_micros() as f32)/ 1_000_000.);
-            //println!("{:.3}", (start.elapsed().as_micros() as f32)/ 1_000_000.);
-            //println!("{}, {}", res_vec.len(), res_vec[0].decrypt_decode(&tfhe.sk1).unwrap());
-        }
-
-        /*let mut iter = times.iter().enumerate();
-        let init = iter.next().ok_or("Need at least one input").unwrap();
-        let res = iter.try_fold(init, |acc, x| {
-            let cmp = x.1.partial_cmp(acc.1).unwrap();
-            let min = if let std::cmp::Ordering::Less = cmp {
-                x
-            } else {
-                acc
-            };
-            Some(min)
-        });
-        println!("{}, {:?}", nbr, res.unwrap().0+1);
-        */
-        println!("{:?}", times);
-    }
     Ok(())
 }
