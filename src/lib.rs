@@ -21,7 +21,7 @@ pub struct Tfheconcurrency{
     pub sk0: LWESecretKey,
     pub sk1: LWESecretKey,
     bsk: LWEBSK,
-    ksk:LWEKSK,
+    ksk: LWEKSK,
     enc: Encoder,
     //f: Fn(f64)->f64,
     pub max_threads: usize
@@ -42,21 +42,21 @@ impl Tfheconcurrency {
             self.enc.save();
         }*/
         return Tfheconcurrency{
-            bsk: LWEBSK::new(&sk, &sk_rlwe, 6, 6),
-            ksk: LWEKSK::new(&sk_out, &sk, 6, 6),
             sk0: sk,
             sk1: sk_out,
+            bsk: LWEBSK::new(&sk, &sk_rlwe, 6, 6),
+            ksk: LWEKSK::new(&sk_out, &sk, 6, 6),
             enc: enc,
             max_threads: threads
             };
     }
 
-    pub fn new(sk: LWESecretKey, sk_out: LWESecretKey, bsk: LWEBSK, ksk: LWEKSK, enc: Encoder, threads: usize, _save: bool) -> Tfheconcurrency{
+    pub fn new(sk: LWESecretKey, sk_out: LWESecretKey, boot_key: LWEBSK, kswitch_key: LWEKSK, enc: Encoder, threads: usize) -> Tfheconcurrency{
         return Tfheconcurrency{
-            bsk: bsk,
-            ksk: ksk,
             sk0: sk,
             sk1: sk_out,
+            bsk: boot_key,
+            ksk: kswitch_key,
             enc: enc,
             max_threads: threads
             };
